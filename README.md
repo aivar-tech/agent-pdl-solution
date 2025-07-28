@@ -35,6 +35,41 @@ Aivar PDL Agents is a powerful asynchronous multi-agent workflow system designed
 
 ## Technical Architecture
 
+### Agent Core and Strands Framework
+
+The PDL Agents system leverages two powerful agent frameworks to enable its multi-agent capabilities:
+
+#### Bedrock Agent Core
+
+Bedrock Agent Core provides the foundation for building AI agents that can process natural language, make decisions, and take actions. In our system, it's used for:
+
+- **Agent Lifecycle Management**: Handling agent initialization, message routing, and termination
+- **Message Handling**: Processing incoming messages with the `@on_message()` decorator
+- **State Management**: Maintaining agent state across interactions
+- **API Integration**: Seamless integration with FastAPI through `agent_app`
+
+```python
+from bedrock_agentcore.agent import Agent, agent_app, on_message
+
+class ScopingAgent(Agent):
+    @on_message()
+    async def handle_pm_input(self, message):
+        pm_brief = message.payload['brief']
+        scope_doc = self.generate_scope(pm_brief)
+        await self.send("scope_document", {"scope": scope_doc}, to=message.sender)
+```
+
+#### Strands Framework
+
+Strands is a higher-level orchestration framework that enables complex agent workflows and interactions. In our system, it's used for:
+
+- **Agent Orchestration**: Coordinating the execution flow between multiple specialized agents
+- **Parallel Processing**: Enabling concurrent agent execution where appropriate
+- **Message Passing**: Facilitating structured communication between agents
+- **Tool Integration**: Providing agents with access to external tools and APIs
+
+The combination of Bedrock Agent Core for individual agent capabilities and Strands for orchestration creates a powerful, flexible system that can handle complex analytical workflows while maintaining modularity and extensibility.
+
 ### System Architecture Diagram
 
 ```mermaid
