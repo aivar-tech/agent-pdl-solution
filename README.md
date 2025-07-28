@@ -35,6 +35,52 @@ Aivar PDL Agents is a powerful asynchronous multi-agent workflow system designed
 
 ## Technical Architecture
 
+### System Architecture Diagram
+
+```mermaid
+graph TD
+    User[User] --> |Submits Brief| UI[Web UI]
+    UI --> |API Request| API[FastAPI Server]
+    API --> |Orchestrates| MasterAgent[Master Agent]
+    
+    subgraph "Agent Workflow"
+        MasterAgent --> |Step 1| ScopingAgent[Scoping Agent]
+        MasterAgent --> |Step 2| DataAnalysisAgent[Data Analysis Agent]
+        MasterAgent --> |Step 3| HypothesisAgent[Hypothesis Generation Agent]
+        MasterAgent --> |Step 4| TestingAgent[Hypothesis Testing Agent]
+        
+        TestingAgent --> |API Call 1| DataRequirements[Determine Data Requirements]
+        DataRequirements --> |API Call 2| GenerateData[Generate Sample Data]
+    end
+    
+    ScopingAgent --> |Results| ExecutionStorage[(Execution Storage)]
+    DataAnalysisAgent --> |Results| ExecutionStorage
+    HypothesisAgent --> |Results| ExecutionStorage
+    TestingAgent --> |Results| ExecutionStorage
+    
+    ExecutionStorage --> |Load Results| API
+    API --> |Return Results| UI
+    UI --> |Display Results| User
+    UI --> |Export PDF| PDFExport[PDF Export]
+    
+    ScopingAgent --> |LLM Call| Bedrock[AWS Bedrock]
+    DataAnalysisAgent --> |LLM Call| Bedrock
+    HypothesisAgent --> |LLM Call| Bedrock
+    TestingAgent --> |LLM Call| Bedrock
+    
+    classDef userInterface fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef server fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef agent fill:#bfb,stroke:#333,stroke-width:2px;
+    classDef storage fill:#fdb,stroke:#333,stroke-width:2px;
+    classDef external fill:#ddd,stroke:#333,stroke-width:2px;
+    
+    class User,UI userInterface;
+    class API,MasterAgent server;
+    class ScopingAgent,DataAnalysisAgent,HypothesisAgent,TestingAgent,DataRequirements,GenerateData agent;
+    class ExecutionStorage storage;
+    class Bedrock,PDFExport external;
+```
+
 ### Backend
 
 - **FastAPI Framework**: High-performance API server with async support
