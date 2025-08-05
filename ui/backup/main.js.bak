@@ -687,7 +687,10 @@ async function exportToPDF() {
       gold: [241, 201, 59],     // Aivar gold
       text: [35, 41, 74],       // Dark text
       textSecondary: [100, 100, 100], // Secondary text
-      lightGray: [240, 240, 240] // Light gray background
+      lightGray: [248, 249, 252], // Light gray background
+      lightBlue: [238, 241, 248], // Light blue for accents
+      accentGreen: [72, 187, 120], // Accent green for highlights
+      borderGray: [226, 232, 240]  // Border color
     };
     
     // Set document properties
@@ -699,33 +702,71 @@ async function exportToPDF() {
       creator: 'Aivar Product Analysis Tool'
     });
     
-    // Add cover page
+    // Add cover page with gradient-like effect
+    // Background base
     doc.setFillColor(...colors.lightGray);
     doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
     
-    // Add logo placeholder (could be replaced with actual logo)
+    // Top accent bar
     doc.setFillColor(...colors.blue);
-    doc.roundedRect(doc.internal.pageSize.getWidth() / 2 - 20, 40, 40, 40, 5, 5, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.text('A', doc.internal.pageSize.getWidth() / 2, 65, { align: 'center' });
+    doc.rect(0, 0, doc.internal.pageSize.getWidth(), 15, 'F');
     
-    // Add title
-    doc.setTextColor(...colors.text);
+    // Side accent
+    doc.setFillColor(...colors.purple);
+    doc.rect(0, 15, 15, doc.internal.pageSize.getHeight() - 15, 'F');
+    
+    // Decorative elements
+    for (let i = 0; i < 5; i++) {
+      const opacity = 0.1 - (i * 0.015);
+      doc.setFillColor(...colors.blue, opacity);
+      doc.circle(25, 35, 60 - (i * 10), 'F');
+      
+      doc.setFillColor(...colors.purple, opacity);
+      doc.circle(doc.internal.pageSize.getWidth() - 25, 
+                doc.internal.pageSize.getHeight() - 40, 
+                50 - (i * 8), 'F');
+    }
+    
+    // Add logo placeholder with modern design
+    doc.setFillColor(...colors.blue);
+    doc.roundedRect(doc.internal.pageSize.getWidth() / 2 - 25, 50, 50, 50, 8, 8, 'F');
+    
+    // Logo inner accent
+    doc.setFillColor(...colors.gold);
+    doc.roundedRect(doc.internal.pageSize.getWidth() / 2 - 15, 60, 30, 30, 5, 5, 'F');
+    
+    doc.setTextColor(255, 255, 255);
     doc.setFontSize(28);
     doc.setFont('helvetica', 'bold');
-    doc.text('Product Analysis Report', doc.internal.pageSize.getWidth() / 2, 110, { align: 'center' });
+    doc.text('A', doc.internal.pageSize.getWidth() / 2, 80, { align: 'center' });
     
-    // Add subtitle with date
+    // Add title with enhanced styling
+    doc.setTextColor(...colors.text);
+    doc.setFontSize(32);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Product Analysis', doc.internal.pageSize.getWidth() / 2, 130, { align: 'center' });
+    
+    doc.setFontSize(34);
+    doc.setTextColor(...colors.blue);
+    doc.text('Report', doc.internal.pageSize.getWidth() / 2, 150, { align: 'center' });
+    
+    // Add subtitle with date in a more elegant format
     doc.setTextColor(...colors.textSecondary);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Generated on ${new Date().toLocaleDateString()}`, doc.internal.pageSize.getWidth() / 2, 120, { align: 'center' });
     
-    // Add execution ID
+    // Format date in a more readable way
+    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = new Date().toLocaleDateString(undefined, dateOptions);
+    doc.text(`Generated on ${formattedDate}`, doc.internal.pageSize.getWidth() / 2, 170, { align: 'center' });
+    
+    // Add execution ID with better styling
+    doc.setFillColor(...colors.lightBlue);
+    doc.roundedRect(doc.internal.pageSize.getWidth() / 2 - 40, 180, 80, 15, 3, 3, 'F');
+    
     doc.setFontSize(10);
-    doc.text(`Report ID: ${executionId || 'N/A'}`, doc.internal.pageSize.getWidth() / 2, 130, { align: 'center' });
+    doc.setTextColor(...colors.blue);
+    doc.text(`Report ID: ${executionId || 'N/A'}`, doc.internal.pageSize.getWidth() / 2, 190, { align: 'center' });
     
     // Add decorative elements
     doc.setDrawColor(...colors.purple);
@@ -815,24 +856,30 @@ async function exportToPDF() {
       doc.setLineWidth(0.5);
       doc.line(20, 25, 190, 25);
       
-      // Extract and process content as text whenever possible
+      // Try to extract text content first for better quality
+      const sections = card.querySelectorAll('.section-accordion');
       let yPosition = 35;
       
-      // First try to process structured sections
-      const sections = card.querySelectorAll('.section-accordion');
-      
       if (sections.length > 0) {
-        // Process each section as text
+        // Process each section as text when possible
         for (const section of sections) {
           const sectionHeader = section.querySelector('.section-header')?.textContent?.trim() || 'Section';
           const sectionContent = section.querySelector('.section-content');
           
-          // Add section header
-          doc.setTextColor(...colors.purple);
+          // Add section header with improved styling
+          // Add section header background
+          doc.setFillColor(...colors.lightBlue);
+          doc.roundedRect(15, yPosition - 7, doc.internal.pageSize.getWidth() - 30, 14, 3, 3, 'F');
+          
+          // Add accent marker
+          doc.setFillColor(...colors.purple);
+          doc.rect(15, yPosition - 7, 5, 14, 'F');
+          
+          doc.setTextColor(...colors.blue);
           doc.setFontSize(14);
           doc.setFont('helvetica', 'bold');
-          doc.text(sectionHeader, 20, yPosition);
-          yPosition += 8;
+          doc.text(sectionHeader, 25, yPosition);
+          yPosition += 12;
           
           // Add section content
           doc.setTextColor(...colors.text);
@@ -840,86 +887,39 @@ async function exportToPDF() {
           doc.setFont('helvetica', 'normal');
           
           if (sectionContent) {
-            // Process content based on its structure
-            if (sectionContent.classList.contains('section-list')) {
-              // Handle lists specially
-              const listItems = sectionContent.querySelectorAll('li');
-              if (listItems.length > 0) {
-                let itemY = yPosition;
-                for (let i = 0; i < listItems.length; i++) {
-                  const itemText = listItems[i].textContent.trim();
-                  const bulletPoint = '• ';
-                  const wrappedText = doc.splitTextToSize(itemText, 165); // Slightly narrower for bullet indent
-                  
-                  // Check if we need a new page
-                  if (itemY + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                    doc.addPage();
-                    itemY = 20;
-                  }
-                  
-                  // Add bullet point
-                  doc.text(bulletPoint, 20, itemY);
-                  // Add indented text
-                  doc.text(wrappedText, 25, itemY);
-                  itemY += (wrappedText.length * 5) + 3;
-                }
-                yPosition = itemY + 5; // Update position after list
-              }
-            } else {
-              // Process nested objects if present
-              const nestedObjects = sectionContent.querySelectorAll('.nested-object');
-              if (nestedObjects.length > 0) {
-                for (const nestedObj of nestedObjects) {
-                  const nestedTitle = nestedObj.querySelector('b')?.textContent || 'Item';
-                  doc.setFont('helvetica', 'bold');
-                  doc.text(nestedTitle, 20, yPosition);
-                  doc.setFont('helvetica', 'normal');
-                  yPosition += 5;
-                  
-                  const nestedContent = nestedObj.querySelector('.nested-content');
-                  if (nestedContent) {
-                    const nestedItems = nestedContent.querySelectorAll('div');
-                    for (const item of nestedItems) {
-                      const itemText = item.textContent.trim();
-                      const wrappedText = doc.splitTextToSize(itemText, 165);
-                      
-                      // Check if we need a new page
-                      if (yPosition + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                        doc.addPage();
-                        yPosition = 20;
-                      }
-                      
-                      doc.text(wrappedText, 25, yPosition); // Indented
-                      yPosition += (wrappedText.length * 5) + 3;
-                    }
-                  }
-                  yPosition += 5; // Space after nested object
-                }
-              } else {
-                // Standard text content processing
-                let contentText = sectionContent.textContent?.trim() || 'No content';
-                const splitText = doc.splitTextToSize(contentText, 170);
-                
-                // Check if content will fit on current page
-                if (yPosition + (splitText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                  doc.addPage();
-                  yPosition = 20;
-                }
-                
-                doc.text(splitText, 20, yPosition);
-                yPosition += (splitText.length * 5) + 7;
-              }
+            // Try to get text content
+            let contentText = sectionContent.textContent?.trim() || 'No content';
+            
+            // Split text into multiple lines
+            const splitText = doc.splitTextToSize(contentText, 170);
+            
+            // Check if content will fit on current page
+            if (yPosition + (splitText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
+              doc.addPage();
+              yPosition = 20;
             }
+            
+            // Calculate content height
+            const contentHeight = (splitText.length * 5) + 15;
+            
+            // Adjust content background height
+            doc.setFillColor(255, 255, 255);
+            doc.roundedRect(15, yPosition - 5, doc.internal.pageSize.getWidth() - 30, contentHeight, 3, 3, 'F');
+            
+            // Add subtle border
+            doc.setDrawColor(...colors.borderGray);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(15, yPosition - 5, doc.internal.pageSize.getWidth() - 30, contentHeight, 3, 3, 'S');
+            
+            doc.text(splitText, 25, yPosition);
+            yPosition += (splitText.length * 5) + 15;
           } else {
             doc.text('No content available', 20, yPosition);
-            yPosition += 7;
+            yPosition += 10;
           }
           
-          // Add separator between sections
-          doc.setDrawColor(220, 220, 220);
-          doc.setLineWidth(0.2);
-          doc.line(20, yPosition - 3, 190, yPosition - 3);
-          yPosition += 7; // Space after separator
+          // Add some spacing between sections
+          yPosition += 5;
           
           // Check if we need a new page for the next section
           if (yPosition > doc.internal.pageSize.getHeight() - 30) {
@@ -928,107 +928,59 @@ async function exportToPDF() {
           }
         }
       } else {
-        // Try to extract content from markdown or other content
-        const markdownContent = card.querySelector('.agent-output-md');
-        if (markdownContent) {
-          // Process markdown content as text
-          const paragraphs = markdownContent.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, table');
-          
-          if (paragraphs.length > 0) {
-            for (const para of paragraphs) {
-              // Handle different element types
-              const tagName = para.tagName.toLowerCase();
-              const text = para.textContent.trim();
-              
-              if (!text) continue; // Skip empty elements
-              
-              // Set formatting based on element type
-              if (tagName.startsWith('h')) {
-                // Headers
-                const level = parseInt(tagName.substring(1));
-                const fontSize = 16 - (level - 1) * 2; // h1=16, h2=14, etc.
-                doc.setFontSize(fontSize);
-                doc.setFont('helvetica', 'bold');
-              } else if (tagName === 'li') {
-                // List items
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'normal');
-                // Add bullet for list items
-                const wrappedText = doc.splitTextToSize(text, 165);
-                
-                // Check if we need a new page
-                if (yPosition + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                  doc.addPage();
-                  yPosition = 20;
-                }
-                
-                doc.text('• ', 20, yPosition);
-                doc.text(wrappedText, 25, yPosition); // Indented
-                yPosition += (wrappedText.length * 5) + 3;
-                continue; // Skip the standard text processing below
-              } else {
-                // Regular paragraphs
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'normal');
-              }
-              
-              // Process the text
-              const wrappedText = doc.splitTextToSize(text, 170);
-              
-              // Check if content will fit on current page
-              if (yPosition + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                doc.addPage();
-                yPosition = 20;
-              }
-              
-              doc.text(wrappedText, 20, yPosition);
-              yPosition += (wrappedText.length * 5) + (tagName.startsWith('h') ? 10 : 5);
-            }
-          } else {
-            // If no paragraphs found, try to get the raw text
-            const text = markdownContent.textContent.trim();
-            const wrappedText = doc.splitTextToSize(text, 170);
-            
-            if (yPosition + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-              doc.addPage();
-              yPosition = 20;
-            }
-            
-            doc.text(wrappedText, 20, yPosition);
-            yPosition += (wrappedText.length * 5) + 10;
-          }
-        } else {
-          // Last resort: fallback to image capture if no text content can be extracted
-          const canvas = await html2canvas(card, {
-            scale: 2, // Higher resolution
-            logging: false,
-            useCORS: true
-          });
-          
-          const imgData = canvas.toDataURL('image/png');
-          const imgWidth = doc.internal.pageSize.getWidth() - 40; // 20mm margins on each side
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-          
-          // Add the image to the PDF
-          doc.addImage(imgData, 'PNG', 20, 35, imgWidth, imgHeight);
-        }
+        // Fallback to image capture if structured sections aren't available
+        const canvas = await html2canvas(card, {
+          scale: 2, // Higher resolution
+          logging: false,
+          useCORS: true
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = doc.internal.pageSize.getWidth() - 40; // 20mm margins on each side
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Add the image to the PDF
+        doc.addImage(imgData, 'PNG', 20, 35, imgWidth, imgHeight);
       }
     }
     
-    // Add footer to all pages (except cover)
+    // Add footer to all pages (except cover) with improved styling
     const pageCount = doc.internal.getNumberOfPages();
     const pageWidth = doc.internal.pageSize.getWidth();
     
     for (let i = 2; i <= pageCount; i++) {
       doc.setPage(i);
+      
+      // Add footer background
+      doc.setFillColor(...colors.lightBlue);
+      doc.rect(0, doc.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
+      
+      // Add page number with better styling
+      doc.setFillColor(255, 255, 255);
+      doc.circle(pageWidth / 2, doc.internal.pageSize.getHeight() - 10, 8, 'F');
+      
+      doc.setTextColor(...colors.blue);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${i - 1}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 7, { align: 'center' });
+      
+      // Add total pages indicator
+      doc.setTextColor(255, 255, 255);
       doc.setFontSize(8);
-      doc.setTextColor(...colors.textSecondary);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`of ${pageCount - 1}`, pageWidth / 2 + 12, doc.internal.pageSize.getHeight() - 7, { align: 'left' });
       
-      // Add page number
-      doc.text(`Page ${i - 1} of ${pageCount - 1}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+      // Add Aivar branding
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Aivar AI', 15, doc.internal.pageSize.getHeight() - 7);
       
-      // Add footer line
-      doc.setDrawColor(200, 200, 200);
+      // Add date on right
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(new Date().toLocaleDateString(), pageWidth - 15, doc.internal.pageSize.getHeight() - 7, { align: 'right' });
     }
     
     // Save the PDF
@@ -1090,43 +1042,92 @@ async function previewPDF() {
       purple: [130, 38, 158],   // Aivar purple
       gold: [241, 201, 59],     // Gold accent
       text: [35, 41, 74],       // Main text color
-      textSecondary: [100, 100, 100] // Secondary text
+      textSecondary: [100, 100, 100], // Secondary text
+      lightGray: [248, 249, 252], // Light gray background
+      lightBlue: [238, 241, 248], // Light blue for accents
+      accentGreen: [72, 187, 120], // Accent green for highlights
+      borderGray: [226, 232, 240]  // Border color
     };
     
-    // Add cover page
+    // Add cover page with gradient-like effect
+    // Background base
+    doc.setFillColor(...colors.lightGray);
+    doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
+    
+    // Top accent bar
     doc.setFillColor(...colors.blue);
-    doc.rect(0, 0, doc.internal.pageSize.getWidth(), 50, 'F');
+    doc.rect(0, 0, doc.internal.pageSize.getWidth(), 15, 'F');
     
-    // Add logo placeholder
-    doc.setFillColor(255, 255, 255);
-    doc.circle(doc.internal.pageSize.getWidth() / 2, 30, 15, 'F');
+    // Side accent
+    doc.setFillColor(...colors.purple);
+    doc.rect(0, 15, 15, doc.internal.pageSize.getHeight() - 15, 'F');
     
-    // Add title
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(24);
+    // Decorative elements
+    for (let i = 0; i < 5; i++) {
+      const opacity = 0.1 - (i * 0.015);
+      doc.setFillColor(...colors.blue, opacity);
+      doc.circle(25, 35, 60 - (i * 10), 'F');
+      
+      doc.setFillColor(...colors.purple, opacity);
+      doc.circle(doc.internal.pageSize.getWidth() - 25, 
+                doc.internal.pageSize.getHeight() - 40, 
+                50 - (i * 8), 'F');
+    }
+    
+    // Add logo placeholder with modern design
+    doc.setFillColor(...colors.blue);
+    doc.roundedRect(doc.internal.pageSize.getWidth() / 2 - 25, 50, 50, 50, 8, 8, 'F');
+    
+    // Logo inner accent
+    doc.setFillColor(...colors.gold);
+    doc.roundedRect(doc.internal.pageSize.getWidth() / 2 - 15, 60, 30, 30, 5, 5, 'F');
+    
+    // Add logo text
     doc.setTextColor(255, 255, 255);
-    doc.text('Product Analysis Report', doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
+    doc.setFontSize(28);
+    doc.setFont('helvetica', 'bold');
+    doc.text('A', doc.internal.pageSize.getWidth() / 2, 80, { align: 'center' });
     
-    // Add subtitle
+    // Add title with enhanced styling
+    doc.setTextColor(...colors.text);
+    doc.setFontSize(32);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Product Analysis', doc.internal.pageSize.getWidth() / 2, 130, { align: 'center' });
+    
+    doc.setFontSize(34);
+    doc.setTextColor(...colors.blue);
+    doc.text('Report', doc.internal.pageSize.getWidth() / 2, 150, { align: 'center' });
+    
+    // Add subtitle with date in a more elegant format
+    doc.setTextColor(...colors.textSecondary);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Generated on ${new Date().toLocaleDateString()}`, doc.internal.pageSize.getWidth() / 2, 45, { align: 'center' });
     
-    // Add main content area
-    doc.setFillColor(255, 255, 255);
-    doc.roundedRect(20, 70, doc.internal.pageSize.getWidth() - 40, doc.internal.pageSize.getHeight() - 100, 5, 5, 'F');
+    // Format date in a more readable way
+    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = new Date().toLocaleDateString(undefined, dateOptions);
+    doc.text(`Generated on ${formattedDate}`, doc.internal.pageSize.getWidth() / 2, 170, { align: 'center' });
     
-    // Add title in content area
+    // Add execution ID with better styling
+    doc.setFillColor(...colors.lightBlue);
+    doc.roundedRect(doc.internal.pageSize.getWidth() / 2 - 40, 180, 80, 15, 3, 3, 'F');
+    
+    doc.setFontSize(10);
     doc.setTextColor(...colors.blue);
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Aivar Product Analysis', doc.internal.pageSize.getWidth() / 2, 90, { align: 'center' });
+    doc.text(`Report ID: ${executionId || 'N/A'}`, doc.internal.pageSize.getWidth() / 2, 190, { align: 'center' });
     
-    // Add execution ID
-    doc.setTextColor(...colors.text);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Report ID: ${executionId || 'N/A'}`, doc.internal.pageSize.getWidth() / 2, 130, { align: 'center' });
+    // Add decorative elements
+    doc.setDrawColor(...colors.purple);
+    doc.setLineWidth(1.5);
+    doc.line(doc.internal.pageSize.getWidth() / 2 - 40, 140, doc.internal.pageSize.getWidth() / 2 + 40, 140);
+    
+    // Add footer to cover page
+    doc.setTextColor(...colors.textSecondary);
+    doc.setFontSize(10);
+    doc.text('Powered by Aivar AI', doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 20, { align: 'center' });
+    
+    // We've already styled the cover page, so we don't need the content area here
+    // The content will be added on subsequent pages with proper styling
     
     // Add decorative elements
     doc.setDrawColor(...colors.purple);
@@ -1216,14 +1217,12 @@ async function previewPDF() {
       doc.setLineWidth(0.5);
       doc.line(20, 25, 190, 25);
       
-      // Extract and process content as text whenever possible
+      // Try to extract text content first for better quality
+      const sections = card.querySelectorAll('.section-accordion');
       let yPosition = 35;
       
-      // First try to process structured sections
-      const sections = card.querySelectorAll('.section-accordion');
-      
       if (sections.length > 0) {
-        // Process each section as text
+        // Process each section as text when possible
         for (const section of sections) {
           const sectionHeader = section.querySelector('.section-header')?.textContent?.trim() || 'Section';
           const sectionContent = section.querySelector('.section-content');
@@ -1240,179 +1239,46 @@ async function previewPDF() {
           doc.setFontSize(11);
           doc.setFont('helvetica', 'normal');
           
-          if (sectionContent) {
-            // Process content based on its structure
-            if (sectionContent.classList.contains('section-list')) {
-              // Handle lists specially
-              const listItems = sectionContent.querySelectorAll('li');
-              if (listItems.length > 0) {
-                let itemY = yPosition;
-                for (let i = 0; i < listItems.length; i++) {
-                  const itemText = listItems[i].textContent.trim();
-                  const bulletPoint = '• ';
-                  const wrappedText = doc.splitTextToSize(itemText, 165); // Slightly narrower for bullet indent
-                  
-                  // Check if we need a new page
-                  if (itemY + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                    doc.addPage();
-                    itemY = 20;
-                  }
-                  
-                  // Add bullet point
-                  doc.text(bulletPoint, 20, itemY);
-                  // Add indented text
-                  doc.text(wrappedText, 25, itemY);
-                  itemY += (wrappedText.length * 5) + 3;
-                }
-                yPosition = itemY + 5; // Update position after list
-              }
-            } else {
-              // Process nested objects if present
-              const nestedObjects = sectionContent.querySelectorAll('.nested-object');
-              if (nestedObjects.length > 0) {
-                for (const nestedObj of nestedObjects) {
-                  const nestedTitle = nestedObj.querySelector('b')?.textContent || 'Item';
-                  doc.setFont('helvetica', 'bold');
-                  doc.text(nestedTitle, 20, yPosition);
-                  doc.setFont('helvetica', 'normal');
-                  yPosition += 5;
-                  
-                  const nestedContent = nestedObj.querySelector('.nested-content');
-                  if (nestedContent) {
-                    const nestedItems = nestedContent.querySelectorAll('div');
-                    for (const item of nestedItems) {
-                      const itemText = item.textContent.trim();
-                      const wrappedText = doc.splitTextToSize(itemText, 165);
-                      
-                      // Check if we need a new page
-                      if (yPosition + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                        doc.addPage();
-                        yPosition = 20;
-                      }
-                      
-                      doc.text(wrappedText, 25, yPosition); // Indented
-                      yPosition += (wrappedText.length * 5) + 3;
-                    }
-                  }
-                  yPosition += 5; // Space after nested object
-                }
-              } else {
-                // Standard text content processing
-                let contentText = sectionContent.textContent?.trim() || 'No content';
-                const splitText = doc.splitTextToSize(contentText, 170);
-                
-                // Check if content will fit on current page
-                if (yPosition + (splitText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                  doc.addPage();
-                  yPosition = 20;
-                }
-                
-                doc.text(splitText, 20, yPosition);
-                yPosition += (splitText.length * 5) + 7;
-              }
-            }
-          } else {
-            doc.text('No content available', 20, yPosition);
-            yPosition += 7;
+          // Get text content
+          let contentText = sectionContent?.textContent?.trim() || 'No content available';
+          
+          // Split text into lines to fit page width
+          const contentLines = doc.splitTextToSize(contentText, 170);
+          
+          // Check if content will fit on current page
+          if (yPosition + contentLines.length * 5 > doc.internal.pageSize.getHeight() - 20) {
+            doc.addPage();
+            yPosition = 20;
           }
           
-          // Add separator between sections
+          doc.text(contentLines, 20, yPosition);
+          yPosition += contentLines.length * 5 + 10;
+          
+          // Add separator
           doc.setDrawColor(220, 220, 220);
           doc.setLineWidth(0.2);
-          doc.line(20, yPosition - 3, 190, yPosition - 3);
-          yPosition += 7; // Space after separator
+          doc.line(20, yPosition - 5, 190, yPosition - 5);
           
-          // Check if we need a new page for the next section
-          if (yPosition > doc.internal.pageSize.getHeight() - 30) {
+          // Check if we need a new page for next section
+          if (yPosition > doc.internal.pageSize.getHeight() - 40) {
             doc.addPage();
             yPosition = 20;
           }
         }
       } else {
-        // Try to extract content from markdown or other content
-        const markdownContent = card.querySelector('.agent-output-md');
-        if (markdownContent) {
-          // Process markdown content as text
-          const paragraphs = markdownContent.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, table');
-          
-          if (paragraphs.length > 0) {
-            for (const para of paragraphs) {
-              // Handle different element types
-              const tagName = para.tagName.toLowerCase();
-              const text = para.textContent.trim();
-              
-              if (!text) continue; // Skip empty elements
-              
-              // Set formatting based on element type
-              if (tagName.startsWith('h')) {
-                // Headers
-                const level = parseInt(tagName.substring(1));
-                const fontSize = 16 - (level - 1) * 2; // h1=16, h2=14, etc.
-                doc.setFontSize(fontSize);
-                doc.setFont('helvetica', 'bold');
-              } else if (tagName === 'li') {
-                // List items
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'normal');
-                // Add bullet for list items
-                const wrappedText = doc.splitTextToSize(text, 165);
-                
-                // Check if we need a new page
-                if (yPosition + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                  doc.addPage();
-                  yPosition = 20;
-                }
-                
-                doc.text('• ', 20, yPosition);
-                doc.text(wrappedText, 25, yPosition); // Indented
-                yPosition += (wrappedText.length * 5) + 3;
-                continue; // Skip the standard text processing below
-              } else {
-                // Regular paragraphs
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'normal');
-              }
-              
-              // Process the text
-              const wrappedText = doc.splitTextToSize(text, 170);
-              
-              // Check if content will fit on current page
-              if (yPosition + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-                doc.addPage();
-                yPosition = 20;
-              }
-              
-              doc.text(wrappedText, 20, yPosition);
-              yPosition += (wrappedText.length * 5) + (tagName.startsWith('h') ? 10 : 5);
-            }
-          } else {
-            // If no paragraphs found, try to get the raw text
-            const text = markdownContent.textContent.trim();
-            const wrappedText = doc.splitTextToSize(text, 170);
-            
-            if (yPosition + (wrappedText.length * 5) > doc.internal.pageSize.getHeight() - 20) {
-              doc.addPage();
-              yPosition = 20;
-            }
-            
-            doc.text(wrappedText, 20, yPosition);
-            yPosition += (wrappedText.length * 5) + 10;
-          }
-        } else {
-          // Last resort: fallback to image capture if no text content can be extracted
-          const canvas = await html2canvas(card, {
-            scale: 2, // Higher resolution
-            logging: false,
-            useCORS: true
-          });
-          
-          const imgData = canvas.toDataURL('image/png');
-          const imgWidth = doc.internal.pageSize.getWidth() - 40; // 20mm margins on each side
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-          
-          // Add the image to the PDF
-          doc.addImage(imgData, 'PNG', 20, 35, imgWidth, imgHeight);
-        }
+        // Fallback to image capture if structured sections aren't available
+        const canvas = await html2canvas(card, {
+          scale: 2, // Higher resolution
+          logging: false,
+          useCORS: true
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = doc.internal.pageSize.getWidth() - 40; // 20mm margins on each side
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Add the image to the PDF
+        doc.addImage(imgData, 'PNG', 20, 35, imgWidth, imgHeight);
       }
     }
     

@@ -51,23 +51,38 @@
 .built-by {
   display: flex;
   align-items: center;
-  color: var(--text-primary);
+  justify-content: center;
+  color: var(--text-secondary);
   font-size: 0.85em;
   font-weight: 500;
-  margin-bottom: 1.5em;
-  padding-bottom: 1em;
-  border-bottom: 1px solid var(--border-color);
+  margin-top: 0.8em;
 }
 
 .aivar-link {
   display: inline-flex;
   align-items: center;
   margin-left: 5px;
+  transition: transform 0.2s ease;
 }
 
-.aivar-logo {
-  height: 60px;
-  width: auto;
+.aivar-link:hover {
+  transform: scale(1.05);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1.5em;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.version-info {
+  display: inline-block;
+  padding: 0.3em 0.8em;
+  background: rgba(0,0,0,0.05);
+  border-radius: 12px;
 }
 
 @media (max-width: 600px) {
@@ -84,19 +99,31 @@
       background: white;
       color: var(--blue);
       border-radius: 50%;
-      width: 2.2em;
-      height: 2.2em;
+      width: 2.4em;
+      height: 2.4em;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1em;
-      margin-right: 0.8em;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      font-size: 1.2em;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
       font-weight: 700;
+      margin: 0.5em 0;
+      border: 2px solid var(--gold);
     }
+    
+    .branding-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
     .header-title {
-      font-size: 1.1em;
+      font-size: 1.15em;
       letter-spacing: 0.01em;
+      font-weight: 600;
+      margin: 0.5em 0;
+      color: var(--text-primary);
+      line-height: 1.3;
     }
     .main-layout {
       display: flex;
@@ -105,30 +132,72 @@
     }
     .sidebar {
       background: var(--sidebar);
-      width: 250px;
-      min-width: 250px;
-      padding: 1.2em;
+      width: 280px;
+      min-width: 280px;
+      padding: 1.5em;
       display: flex;
       flex-direction: column;
-      gap: 1.5em;
+      gap: 1.8em;
       border-right: 2px solid var(--border-color);
       overflow-y: auto;
       box-shadow: inset -5px 0 10px -5px rgba(0,0,0,0.05);
     }
+    .executions-list {
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7em;
+      padding-right: 0.5em;
+      margin-bottom: 1em;
+    }
     
+    .executions-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    
+    .executions-list::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.03);
+      border-radius: 10px;
+    }
+    
+    .executions-list::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    
+    .executions-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(0,0,0,0.15);
+    }
     .sidebar-header {
       display: flex;
+      flex-direction: column;
       align-items: center;
       margin-bottom: 1em;
-      padding-bottom: 1em;
+      padding-bottom: 1.2em;
       border-bottom: 2px solid var(--border-color);
+      text-align: center;
     }
     .nav-title {
       font-weight: 700;
       color: var(--purple);
-      margin-bottom: 0.8em;
+      margin-bottom: 1em;
       font-size: 1.1em;
       letter-spacing: 0.01em;
+      position: relative;
+      padding-left: 0.8em;
+    }
+    
+    .nav-title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 16px;
+      background: var(--purple);
+      border-radius: 2px;
     }
     .agent-nav {
       display: flex;
@@ -138,8 +207,8 @@
     .agent-link {
       background: #fff;
       border: none;
-      border-radius: 8px;
-      padding: 0.7em 1em;
+      border-radius: 10px;
+      padding: 0.85em 1.2em;
       font-size: 1em;
       font-weight: 500;
       color: var(--text-primary);
@@ -147,22 +216,65 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.7em;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      gap: 0.8em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
       transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
     }
+    
     .agent-link:hover, .agent-link:focus {
       background: rgba(75, 86, 210, 0.08);
-      box-shadow: 0 2px 10px rgba(75, 86, 210, 0.15);
+      box-shadow: 0 3px 12px rgba(75, 86, 210, 0.15);
+      transform: translateY(-1px);
     }
     
     .agent-link.active {
-      background: linear-gradient(to right, rgba(75, 86, 210, 0.1), rgba(130, 38, 158, 0.1));
-      border-left: 3px solid var(--purple);
+      background: linear-gradient(to right, rgba(75, 86, 210, 0.12), rgba(130, 38, 158, 0.12));
+      border-left: 4px solid var(--purple);
       font-weight: 600;
+      box-shadow: 0 3px 10px rgba(75, 86, 210, 0.2);
     }
     .icon {
-      font-size: 1.2em;
+      font-size: 1.3em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+    }
+    
+    .agent-status {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .agent-status.running {
+      background: var(--blue);
+      box-shadow: 0 0 0 2px rgba(75, 86, 210, 0.3);
+      animation: pulse 1.5s infinite;
+    }
+    
+    .agent-status.completed {
+      background: var(--success);
+      box-shadow: 0 0 0 2px rgba(72, 187, 120, 0.3);
+    }
+    
+    .agent-status.error {
+      background: var(--error);
+      box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.3);
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; transform: translateY(-50%) scale(1); }
+      50% { opacity: 0.6; transform: translateY(-50%) scale(1.2); }
+      100% { opacity: 1; transform: translateY(-50%) scale(1); }
     }
     .main-content {
       flex: 1;
@@ -249,6 +361,64 @@
       display: flex;
       flex-direction: column;
       gap: 0.3em;
+    }
+    
+    .file-upload-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+    }
+    
+    .file-input {
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+    }
+    
+    .file-upload-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      padding: 0.6em 1em;
+      background: var(--sidebar);
+      border: 1px dashed var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+    }
+    
+    .file-upload-label:hover {
+      background: rgba(75, 86, 210, 0.08);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    
+    .upload-icon {
+      font-size: 1.2em;
+    }
+    
+    .file-name {
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      padding: 0.3em 0.5em;
+      background: rgba(0,0,0,0.03);
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    
+    .file-name.has-file {
+      color: var(--blue-dark);
+      background: rgba(75, 86, 210, 0.08);
+      border-left: 3px solid var(--blue);
+      padding-left: 0.7em;
     }
     .input-form label {
       font-weight: 600;
@@ -391,26 +561,121 @@
       margin: 1em 0;
       border-radius: 4px;
     }
-    .export-btn {
+    .export-btn, .preview-btn {
       background: linear-gradient(135deg, var(--blue), var(--purple));
       color: white;
       border: none;
       padding: 8px 16px;
-      border-radius: 4px;
+      border-radius: 6px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(75, 86, 210, 0.2);
     }
-    .export-btn:hover {
+    
+    .export-btn:hover, .preview-btn:hover {
       box-shadow: 0 4px 12px rgba(75, 86, 210, 0.3);
       transform: translateY(-1px);
     }
-    .export-btn:before {
-      content: '📄';
-      font-size: 1.1em;
+    
+    .export-btn:active, .preview-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 3px rgba(75, 86, 210, 0.2);
+    }
+    
+    .preview-btn {
+      background: white;
+      color: var(--blue);
+      border: 1px solid var(--blue);
+      background: linear-gradient(135deg, #ffffff, #f5f7ff);
+    }
+    
+    .btn-icon {
+      font-size: 1.2em;
+      line-height: 1;
+    }
+    
+    .input-error {
+      border: 2px solid var(--error) !important;
+      background-color: #fff5f5 !important;
+      box-shadow: 0 0 0 1px var(--error) !important;
+    }
+    
+    /* PDF Preview Modal */
+    .pdf-preview-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .pdf-preview-content {
+      background-color: white;
+      width: 90%;
+      height: 90%;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+    
+    .pdf-preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+    }
+    
+    .pdf-preview-title {
+      font-weight: 600;
+      font-size: 1.2em;
+    }
+    
+    .pdf-preview-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5em;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+    
+    .pdf-preview-close:hover {
+      background-color: rgba(255,255,255,0.2);
+    }
+    
+    .pdf-preview-body {
+      flex: 1;
+      overflow: auto;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      background-color: #f0f0f0;
+    }
+    
+    .pdf-preview-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
     .footer {
       height: 40px;
@@ -761,8 +1026,11 @@
   <div class="main-layout">
     <aside class="sidebar" aria-label="Agent Navigation">
       <div class="sidebar-header">
-        <span class="logo">G</span>
-        <span class="header-title">Games24x7 Product Scoping AI</span>
+        <div class="branding-logo">
+          <img src="https://cdn.prod.website-files.com/651cf07e5bb9107daafa9310/651d07e5b5c61236021ff3a7_7%20logo.svg" alt="Aivar Logo" class="aivar-logo" style="height: 80px; margin-bottom: 10px;">
+        </div>
+        <span class="header-title">Product Scoping AI</span>
+        
       </div>
       
       <div class="nav-title">Agents</div>
@@ -784,9 +1052,16 @@
           <span class="icon">🧪</span>Hypothesis Testing
         </button>
       </nav>
-      <div class="nav-title" style="margin-top: 1.5em;">Agent Executions</div>
+      <div class="nav-title" style="margin-top: 2em;">Agent Executions</div>
       <div class="executions-list" id="executions-list">
         <div class="loading-text">Loading executions...</div>
+      </div>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v0.0.1</div>
+        <div class="built-by">
+          <span>Powered by Aivar Innovations</span>
+        </div>
       </div>
     </aside>
     <main class="main-content">
@@ -806,6 +1081,17 @@
                   <label for="raw_data">Historical/Product Data</label>
                   <textarea id="raw_data" rows="4" placeholder="Paste relevant data, trends, or leave blank..."></textarea>
                 </div>
+                <div class="form-group">
+                  <label for="document-upload">Upload Product Spec Document</label>
+                  <div class="file-upload-container">
+                    <input type="file" id="document-upload" accept=".pdf,.doc,.docx,.txt" class="file-input" />
+                    <label for="document-upload" class="file-upload-label">
+                      <span class="upload-icon">📄</span>
+                      <span class="upload-text">Choose file</span>
+                    </label>
+                    <div id="file-name" class="file-name">No file selected</div>
+                  </div>
+                </div>
                 <button id="submit-btn" type="submit">Run Multiagent Workflow</button>
               </form>
             </section>
@@ -822,8 +1108,9 @@
         </div>
         <div class="content-column">
           <h2 class="column-title">Agent Analysis Report</h2>
-          <div class="result-actions" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-            <button id="export-pdf-btn" class="export-btn" style="display: none;">Export as PDF</button>
+          <div class="result-actions" style="display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 10px;">
+            <button id="preview-pdf-btn" class="preview-btn" style="display: none;"><span class="btn-icon">👁️</span>Preview Report</button>
+            <button id="export-pdf-btn" class="export-btn" style="display: none;"><span class="btn-icon">📥</span>Export as PDF</button>
           </div>
           <section class="agents-area" id="result">
             <!-- Agent cards rendered by JS -->
@@ -832,12 +1119,20 @@
       </div>
     </main>
   </div>
-  <footer class="footer">
-    <div class="footer-content">
-      <p>© 2025 Product Scoping AI - Powered by <a href="https://aivar.tech" target="_blank">Aivar</a></p>
-    </div>
-  </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="ui/main.js"></script>
+  <!-- PDF Preview Modal -->
+  <div id="pdf-preview-modal" class="pdf-preview-modal">
+    <div class="pdf-preview-content">
+      <div class="pdf-preview-header">
+        <div class="pdf-preview-title">Product Analysis Report Preview</div>
+        <button id="pdf-preview-close" class="pdf-preview-close">&times;</button>
+      </div>
+      <div class="pdf-preview-body">
+        <iframe id="pdf-preview-iframe" class="pdf-preview-iframe"></iframe>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

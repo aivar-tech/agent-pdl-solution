@@ -1,6 +1,7 @@
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Dict, Optional, List, Any
 import uuid
@@ -11,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 import threading
 import asyncio
+import shutil
 
 from master_agent import MasterAgent
 
@@ -32,12 +34,14 @@ app.mount("/ui", StaticFiles(directory="ui"), name="ui")
 # Serve index.html at root
 @app.get("/")
 async def root():
-    from fastapi.responses import FileResponse
     return FileResponse("ui/index.html")
 
-# Create execution directory if it doesn't exist
+# Create directories if they don't exist
 EXECUTIONS_DIR = Path("executions")
 EXECUTIONS_DIR.mkdir(exist_ok=True)
+
+UPLOADS_DIR = Path("uploads")
+UPLOADS_DIR.mkdir(exist_ok=True)
 
 # Models
 class WorkflowRequest(BaseModel):
@@ -59,7 +63,7 @@ class ExecutionStatus(BaseModel):
 active_executions = {}
 
 # Background task to run the workflow
-def run_workflow_task(request_id: str, brief: str, raw_data: Optional[str] = None):
+def run_workflow_task(request_id: str, brief: str, raw_data: Optional[str] = None, document_path: Optional[str] = None):
     try:
         # Update status to running
         update_execution_status(request_id, "running", current_step="Starting workflow")
@@ -71,7 +75,13 @@ def run_workflow_task(request_id: str, brief: str, raw_data: Optional[str] = Non
         update_execution_status(request_id, "running", current_step="Analyzing data")
         
         # Run the workflow
-        if raw_data:
+        if document_path:
+            # If we have a document, process it
+            update_execution_status(request_id, "running", current_step="Processing document")
+            # Here we would add the document processing logic
+            # For now, just pass the document path to the master agent
+            results = master_agent.run_workflow(brief, raw_data, document_path=document_path)
+        elif raw_data:
             results = master_agent.run_workflow(brief, raw_data)
         else:
             results = master_agent.run_workflow(brief)
@@ -84,7 +94,8 @@ def run_workflow_task(request_id: str, brief: str, raw_data: Optional[str] = Non
         update_execution_status(request_id, "failed", error=str(e))
 
 def update_execution_status(request_id: str, status: str, current_step: str = None, 
-                          results: Dict[str, Any] = None, error: str = None):
+                          results: Dict[str, Any] = None, error: str = None,
+                          document_path: str = None):
     """Update the execution status and save to file"""
     
     # Get the execution data
@@ -109,6 +120,9 @@ def update_execution_status(request_id: str, status: str, current_step: str = No
     
     if error is not None:
         execution_data["error"] = error
+        
+    if document_path is not None:
+        execution_data["document_path"] = document_path
     
     # Save to file
     with open(execution_file, "w") as f:
@@ -185,4 +199,56 @@ async def list_workflows():
     
     return executions
 
-# This comment replaces the duplicate root endpoint
+# Add endpoint for document upload
+@app.post("/api/workflow-with-document", response_model=ExecutionStatus)
+async def create_workflow_with_document(
+    brief: str = Form(...),
+    raw_data: Optional[str] = Form(None),
+    document: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    """Start a new workflow execution with a document"""
+    
+    # Generate a unique ID for this execution
+    request_id = str(uuid.uuid4())
+    
+    # Create a directory for this execution's files
+    execution_upload_dir = UPLOADS_DIR / request_id
+    execution_upload_dir.mkdir(exist_ok=True)
+    
+    # Save the uploaded file
+    file_path = execution_upload_dir / document.filename
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(document.file, buffer)
+    
+    # Create execution data
+    execution_data = {
+        "request_id": request_id,
+        "status": "pending",
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+        "brief": brief,
+        "raw_data": raw_data,
+        "document_path": str(file_path),
+        "document_name": document.filename,
+        "current_step": "Queued"
+    }
+    
+    # Save to file
+    execution_file = EXECUTIONS_DIR / f"{request_id}.json"
+    with open(execution_file, "w") as f:
+        json.dump(execution_data, f, indent=2)
+    
+    # Store in memory
+    active_executions[request_id] = execution_data
+    
+    # Start the workflow in the background
+    background_tasks.add_task(
+        run_workflow_task, 
+        request_id=request_id, 
+        brief=brief, 
+        raw_data=raw_data,
+        document_path=str(file_path)
+    )
+    
+    return execution_data
